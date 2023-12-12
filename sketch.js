@@ -1,6 +1,7 @@
 let snowTile, sprite1Still, sprite2Still, song, pixelFont, title, snowman,
-    stage;
+    stage, startButton;
 let moveSpeed = 2;
+let isGameStarted = false;
 
 
 function preload() {
@@ -12,7 +13,8 @@ function preload() {
     pixelFont = loadFont("assets/PixelifySans-VariableFont_wght.ttf");
     title = loadImage("assets/Snowbomber title.png");
     snowman = loadImage("assets/Snowman.png");
-    stage = loadImage("assets/Stage.png")
+    stage = loadImage("assets/Stage.png");
+    startButton = loadImage("assets/StartGameButton.png");
 }
 
 
@@ -169,6 +171,10 @@ class SnowBall {
     // }
 }
 
+class Snowman {
+    
+}
+
 let player1 = new Sprite1();
 let player2 = new Sprite2();
 let snowBall1 = [new SnowBall()];
@@ -177,19 +183,22 @@ let snowBall2 = [new SnowBall()];
 
 function setup() {
     createCanvas(1000, 1000);
-
+    imageMode(CENTER);
+    rectMode(CENTER);
 }
 
 function draw() {
     background(255);
-    imageMode(CENTER);
     image(stage, width/2, height/2)
     playerActions();
     snowBalls();
     scores();
     //snowBallHit();
-    //line(width/2, 0, width/2, height);
+    middleLine();
     image(title, width/2, 90, 500, 200);
+    startGame();
+    music();
+
 
     //console.log("p1.x, p1.y, p2.x, p2.y:", player1.x+20, player1.y, player2.x-20, player2.y)
     // console.log(player1.score[0]);
@@ -206,46 +215,48 @@ function draw() {
  * @pushes values to snowBall array.
  */
 function keyReleased() {
-    if (key === "a") {
-        if (!keyIsPressed/**PLEASE ASK ABI HOW TO FIX THIS */) {
-            player1.xDir = 0;
+    if (isGameStarted) {
+        if (key === "a") {
+            if (!keyIsDown("d")) {
+                player1.xDir = 0;
+            }
         }
-    }
-    if (key === "d") {
-        if (!keyIsPressed) {
-            player1.xDir = 0;
+        if (key === "d") {
+            if (!keyIsPressed) {
+                player1.xDir = 0;
+            }
         }
-    }
-    if (key === "w") {
-        player1.yDir = 0;
-    }
-    if (key === "s") {
-        player1.yDir = 0;
-    }
-    if (key === " ") {
-        player1.snowPosX = player1.x;
-        player1.snowPosY = player1.y;
-        snowBall1.push(new SnowBall(player1.snowPosX, player1.snowPosY, 10));
-        //console.log(player1.snowPosX[0], player1.snowPosY[0]);
-
-    }
-    if (keyCode === LEFT_ARROW) {
-        player2.xDir = 0;
-    }
-    if (keyCode === RIGHT_ARROW) {
-        player2.xDir = 0;
-    }
-    if (keyCode === UP_ARROW) {
-        player2.yDir = 0;
-    }
-    if (keyCode === DOWN_ARROW) {
-        player2.yDir = 0;
-    }
-    if (keyCode === ENTER) {
-        player2.snowPosX = player2.x;
-        player2.snowPosY = player2.y;
-        snowBall2.push(new SnowBall(player2.snowPosX, player2.snowPosY, -10));
-        //console.log(player2.snowPosX[0], player2.snowPosY[0]);
+        if (key === "w") {
+            player1.yDir = 0;
+        }
+        if (key === "s") {
+            player1.yDir = 0;
+        }
+        if (key === " ") {
+            player1.snowPosX = player1.x;
+            player1.snowPosY = player1.y;
+            snowBall1.push(new SnowBall(player1.snowPosX, player1.snowPosY, 10));
+            //console.log(player1.snowPosX[0], player1.snowPosY[0]);
+    
+        }
+        if (keyCode === LEFT_ARROW) {
+            player2.xDir = 0;
+        }
+        if (keyCode === RIGHT_ARROW) {
+            player2.xDir = 0;
+        }
+        if (keyCode === UP_ARROW) {
+            player2.yDir = 0;
+        }
+        if (keyCode === DOWN_ARROW) {
+            player2.yDir = 0;
+        }
+        if (keyCode === ENTER) {
+            player2.snowPosX = player2.x;
+            player2.snowPosY = player2.y;
+            snowBall2.push(new SnowBall(player2.snowPosX, player2.snowPosY, -10));
+            //console.log(player2.snowPosX[0], player2.snowPosY[0]);
+        }
     }
 }
 
@@ -255,7 +266,7 @@ function keyReleased() {
  * @returns (xDir or yDir) as (-1 or 1).
  */
 function keyPressed() {
-    // if (!player1.outOfBounds()) {
+    if (isGameStarted) {
         if (key === "a") {
             if (player1.x >= 50) {
                 player1.xDir = -1;
@@ -276,7 +287,7 @@ function keyPressed() {
                 player1.yDir = 1;
             }
         }
-    // }
+    }
     // if (!player2.outOfBounds()) {
         if (keyCode === LEFT_ARROW) {
             if (player2.x >= width/2+50) {
@@ -313,18 +324,20 @@ function playerActions () {
 function snowBalls() {
     for (let ball of snowBall1) {
         ball.draw();
-        if (ball.x >= player2.x-20 & ball.y <= player2.y+47
+        if (ball.x >= player2.x-20 & ball.x <= player2.x+20 & ball.y <= player2.y+47
                 & ball.y >= player2.y-47) {
-            snowBall1.pop();
+            ball.x=-100000
+            //snowBall1.pop();
             player1.score.unshift(player1.score[0]+1);
         }
         //ball.move();
     }
     for (let ball of snowBall2) {
         ball.draw();
-        if (ball.x <= player1.x+20 & ball.y <= player1.y+49
+        if (ball.x <= player1.x+20 & ball.x >= player1.x-20 & ball.y <= player1.y+49
                 & ball.y >= player1.y-41) {
-            snowBall2.pop();
+            ball.x=100000
+            //snowBall2.shift();
             player2.score.unshift(player2.score[0]+1);
             //console.log(ball.x);
         }
@@ -342,9 +355,32 @@ function scores() {
     text(player2.score[0], width-50, 50);
 }
 
-// function snowBallHit() {
-//     console.log(snowBall.x)
-//     if (snowBall[1] <= player2.x-20) {
-//         player1.score.unshift(player1.score[0]+1);
-//     }
-// }
+function startGame() {
+    if (!isGameStarted) {
+        fill(0, 0, 255, 50);
+        rect(width/2, height/2, width, height);
+        image(startButton, width/2, height/2);
+        if (mouseX >= width/2-100 & mouseX <= width/2+100 
+            & mouseY >= height/2-50 & mouseY <= height/2+50) {
+                rect(width/2, height/2, 200, 100);
+        }
+    }
+}
+
+function mouseClicked() {
+    if (mouseX >= width/2-100 & mouseX <= width/2+100 
+        & mouseY >= height/2-50 & mouseY <= height/2+50) {
+            isGameStarted = true;
+    }
+}
+
+function music() {
+    if (isGameStarted && song.isPlaying() === false) {
+        song.play();
+    }
+}
+
+function middleLine() {
+    stroke(0, 80)
+    line(width/2, 0, width/2, height);
+}
