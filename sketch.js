@@ -27,6 +27,7 @@ class Sprite1 {
     // build;
     snowPosX;
     snowPosY;
+    score;
 
 
     constructor() {
@@ -36,6 +37,7 @@ class Sprite1 {
         this.yDir = 0;
         this.snowPosX;
         this.snowPosY;
+        this.score = [0];
     }
 
     draw(x, y) {
@@ -69,11 +71,11 @@ class Sprite1 {
      *you can call event functions within a class
      
      yes you can! */
-    keyPressed() {
-        if (key === "i") {
-            square(this.x, this.y, 20);
-        }
-    }
+    // keyPressed() {
+    //     if (key === "i") {
+    //         square(this.x, this.y, 20);
+    //     }
+    // }
 }
 
 
@@ -93,6 +95,7 @@ class Sprite2 {
     // build;
     snowPosX;
     snowPosY;
+    score;
 
     constructor() {
         this.x = 900;
@@ -101,6 +104,7 @@ class Sprite2 {
         this.yDir = 0;
         this.snowPosX; //[];
         this.snowPosY; //[];
+        this.score = [0];
     }
 
     /**draws the player stood still */
@@ -162,19 +166,27 @@ class SnowBall {
 
 let player1 = new Sprite1();
 let player2 = new Sprite2();
-let snowBall = [new SnowBall()];
+let snowBall1 = [new SnowBall()];
+let snowBall2 = [new SnowBall()];
 
 
 function setup() {
     createCanvas(1000, 1000);
+
 }
 
 function draw() {
     background(255);
+    rectMode(CENTER);
+    rect(100, 504, 40, 90);
     imageMode(CENTER);
     playerActions();
-    drawSnowBalls();
+    snowBalls();
+    scores();
+    //snowBallHit();
     line(width/2, 0, width/2, height);
+    console.log(player1.score[0]);
+    console.log(player2.score[0]);
 
     //player1.keyPressed();
     //circle(player1.snowPosX[0] += 10, player1.snowPosY[0], 20);
@@ -207,7 +219,7 @@ function keyReleased() {
     if (key === " ") {
         player1.snowPosX = player1.x;
         player1.snowPosY = player1.y;
-        snowBall.push(new SnowBall(player1.snowPosX, player1.snowPosY, 10));
+        snowBall1.push(new SnowBall(player1.snowPosX, player1.snowPosY, 10));
         //console.log(player1.snowPosX[0], player1.snowPosY[0]);
 
     }
@@ -226,7 +238,7 @@ function keyReleased() {
     if (keyCode === ENTER) {
         player2.snowPosX = player2.x;
         player2.snowPosY = player2.y;
-        snowBall.push(new SnowBall(player2.snowPosX, player2.snowPosY, -10));
+        snowBall2.push(new SnowBall(player2.snowPosX, player2.snowPosY, -10));
         //console.log(player2.snowPosX[0], player2.snowPosY[0]);
     }
 }
@@ -292,18 +304,35 @@ function playerActions () {
     player2.bounds();
 }
 
-function drawSnowBalls() {
-    for (let ball of snowBall) {
+function snowBalls() {
+    for (let ball of snowBall1) {
         ball.draw();
+        if (ball.x === player2.x-20 & ball.y <= player2.y+47
+                & ball.y >= player2.y-47) {
+            player1.score.unshift(player1.score[0]+1);
+        }
+        //ball.move();
+    }
+    for (let ball of snowBall2) {
+        ball.draw();
+        if (ball.x === player1.x+20 & ball.y <= player1.y+49
+                & ball.y >= player1.y-41) {
+            player2.score.unshift(player2.score[0]+1);
+        }
         //ball.move();
     }
 }
 
-function ground() {
-
-
+function scores() {
+    textAlign(CENTER);
+    fill(0);
+    text(player1.score[0], 50, 50);
+    text(player2.score[0], width-50, 50);
 }
 
-
-
-
+// function snowBallHit() {
+//     console.log(snowBall.x)
+//     if (snowBall[1] <= player2.x-20) {
+//         player1.score.unshift(player1.score[0]+1);
+//     }
+// }
