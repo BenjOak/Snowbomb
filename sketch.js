@@ -177,17 +177,16 @@ function setup() {
 
 function draw() {
     background(255);
-    rectMode(CENTER);
-    rect(100, 504, 40, 90);
     imageMode(CENTER);
     playerActions();
     snowBalls();
     scores();
     //snowBallHit();
     line(width/2, 0, width/2, height);
-    console.log(player1.score[0]);
-    console.log(player2.score[0]);
-
+    console.log("p1.x, p1.y, p2.x, p2.y:", player1.x+20, player1.y, player2.x-20, player2.y)
+    
+    // console.log(player1.score[0]);
+    // console.log(player2.score[0]);
     //player1.keyPressed();
     //circle(player1.snowPosX[0] += 10, player1.snowPosY[0], 20);
     //circle(player2.snowPosX[0] -= 10, player2.snowPosY[0], 20);
@@ -307,17 +306,20 @@ function playerActions () {
 function snowBalls() {
     for (let ball of snowBall1) {
         ball.draw();
-        if (ball.x === player2.x-20 & ball.y <= player2.y+47
+        if (ball.x >= player2.x-20 & ball.y <= player2.y+47
                 & ball.y >= player2.y-47) {
+            snowBall1.pop();
             player1.score.unshift(player1.score[0]+1);
         }
         //ball.move();
     }
     for (let ball of snowBall2) {
         ball.draw();
-        if (ball.x === player1.x+20 & ball.y <= player1.y+49
+        if (ball.x <= player1.x+20 & ball.y <= player1.y+49
                 & ball.y >= player1.y-41) {
+            snowBall2.pop();
             player2.score.unshift(player2.score[0]+1);
+            console.log(ball.x);
         }
         //ball.move();
     }
