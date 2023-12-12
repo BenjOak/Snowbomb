@@ -1,4 +1,5 @@
-let snowTile, sprite1Still, sprite2Still, song, pixelFont;
+let snowTile, sprite1Still, sprite2Still, song, pixelFont, title, snowman,
+    stage;
 let moveSpeed = 2;
 
 
@@ -8,7 +9,10 @@ function preload() {
     sprite1Still = loadImage("assets/Sprite_2_stoodstill.png");
     sprite2Still = loadImage("assets/Sprite_1.png");
     song = loadSound("assets/Snowbomber Theme_01.mp3");
-    pixelFont = loadFont("assets/PixelifySans-VariableFont_wght.ttf")
+    pixelFont = loadFont("assets/PixelifySans-VariableFont_wght.ttf");
+    title = loadImage("assets/Snowbomber title.png");
+    snowman = loadImage("assets/Snowman.png");
+    stage = loadImage("assets/Stage.png")
 }
 
 
@@ -179,11 +183,13 @@ function setup() {
 function draw() {
     background(255);
     imageMode(CENTER);
+    image(stage, width/2, height/2)
     playerActions();
     snowBalls();
     scores();
     //snowBallHit();
-    line(width/2, 0, width/2, height);
+    //line(width/2, 0, width/2, height);
+    image(title, width/2, 90, 500, 200);
 
     //console.log("p1.x, p1.y, p2.x, p2.y:", player1.x+20, player1.y, player2.x-20, player2.y)
     // console.log(player1.score[0]);
@@ -320,7 +326,7 @@ function snowBalls() {
                 & ball.y >= player1.y-41) {
             snowBall2.pop();
             player2.score.unshift(player2.score[0]+1);
-            console.log(ball.x);
+            //console.log(ball.x);
         }
         //ball.move();
     }
@@ -330,6 +336,7 @@ function scores() {
     textAlign(CENTER);
     textFont(pixelFont);
     textSize(40);
+    stroke(8);
     fill(100, 100, 200);
     text(player1.score[0], 50, 50);
     text(player2.score[0], width-50, 50);
