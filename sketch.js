@@ -1,5 +1,5 @@
-let snowTile, sprite1Still, sprite2Still, song, pixelFont, title, snowman,
-    stage, startButton, victorySound, snowBallHit;
+let sprite1Still, sprite2Still, song, pixelFont, title, snowman,
+    stage, startButton, victorySound, snowBallHit, restartButton;
 let moveSpeed = 2;
 let isGameStarted = false;
 let gameIsWon = false;
@@ -11,7 +11,6 @@ let gameRestarted = false;
 
 
 function preload() {
-    snowTile = loadImage("assets/Snow_Tile1.png");
     //swapped the image numbers around for the actual gameplay
     sprite1Still = loadImage("assets/Sprite_2_stoodstill.png");
     sprite2Still = loadImage("assets/Sprite_1.png");
@@ -23,6 +22,7 @@ function preload() {
     snowman = loadImage("assets/Snowman.png");
     stage = loadImage("assets/Stage.png");
     startButton = loadImage("assets/StartGameButton2.png");
+    restartButton = loadImage("assets/RestartButton.png");
 }
 
 class Timer {
@@ -47,19 +47,10 @@ class Timer {
 }
 
 class Sprite1 {
-    //movement
     xDir;
     yDir;
-    //position
     x;
     y;
-    // still;
-    // breathe;
-    // walkLeft;
-    // walkRight;
-    // throwLeft;
-    // throwRight;
-    // build;
     snowPosX;
     snowPosY;
     score;
@@ -115,19 +106,10 @@ class Sprite1 {
 
 
 class Sprite2 {
-    //movement
     xDir;
     yDir;
-    //position
     x;
     y;
-    // still;
-    // breathe;
-    // walkLeft;
-    // walkRight;
-    // throwLeft;
-    // throwRight;
-    // build;
     snowPosX;
     snowPosY;
     score;
@@ -137,8 +119,8 @@ class Sprite2 {
         this.y = 500;
         this.xDir = 0;
         this.yDir = 0;
-        this.snowPosX; //[];
-        this.snowPosY; //[];
+        this.snowPosX;
+        this.snowPosY;
         this.score = [0];
     }
 
@@ -177,8 +159,8 @@ class SnowBall {
     speedX;
     
     constructor(x, y, speedX) {
-        this.x = x;//player1.snowPosX[0];
-        this.y = y;//player1.snowPosY[0];
+        this.x = x;
+        this.y = y;
         this.speedX = speedX;
     }
 
@@ -204,6 +186,7 @@ let snowBall2 = [new SnowBall()];
 let newTimer1 = new Timer();
 let newTimer2 = new Timer();
 let newTimer3 = new Timer();
+let newTimer4 = new Timer();
 let snowman1, snowman2;
 
 function setup() {
@@ -217,26 +200,17 @@ function setup() {
 function draw() {
     background(255);
     image(stage, width/2, height/2);
+    strokeWeight(4);
     buildSnowman();
     playerActions();
     snowBalls();
     scores();
-    //snowBallHit();
     middleLine();
     image(title, width/2, 90, 500, 200);
     startGame();
     music();
     victory();
     snowmanPoints();
-
-    //console.log("p1.x, p1.y, p2.x, p2.y:", player1.x+20, player1.y, player2.x-20, player2.y)
-    // console.log(player1.score[0]);
-    // console.log(player2.score[0]);
-    //player1.keyPressed();
-    //circle(player1.snowPosX[0] += 10, player1.snowPosY[0], 20);
-    //circle(player2.snowPosX[0] -= 10, player2.snowPosY[0], 20);
-    // console.log(player1.x);
-    // console.log(player2.x);
 }
 
 /**sprite stops if player releases movement key
@@ -329,7 +303,6 @@ function keyPressed() {
                 }
             }
         }
-        // if (!player2.outOfBounds()) {
             if (keyCode === LEFT_ARROW) {
                 if (player2.x >= width/2+50) {
                     player2.xDir = -1;
@@ -351,7 +324,6 @@ function keyPressed() {
                 }
         }
     }
-    // }
 }
 
 function playerActions () {
@@ -370,11 +342,9 @@ function snowBalls() {
                 & ball.y >= player2.y-47) {
             ball.x=-100000;
             ball.speedX=0;
-            //snowBall1.pop();
             player1.score.unshift(player1.score[0]+1);
             snowBallHit.play();
         }
-        //ball.move();
     }
     for (let ball of snowBall2) {
         ball.draw();
@@ -382,12 +352,9 @@ function snowBalls() {
                 & ball.y >= player1.y-41) {
             ball.x=100000;
             ball.speedX=0;
-            //snowBall2.shift();
             player2.score.unshift(player2.score[0]+1);
             snowBallHit.play();
-            //console.log(ball.x);
         }
-        //ball.move();
     }
 }
 
@@ -411,6 +378,7 @@ function startGame() {
                 & mouseY >= height/2-50 & mouseY <= height/2+50) {
                     rect(width/2, height/2, 200, 100);
             }
+            gameRules();
         }
     }
 }
@@ -444,7 +412,7 @@ function middleLine() {
 
 function buildSnowman() {
     if (isGameStarted === true) {
-        newTimer3.time.push(30);
+        newTimer3.time.push(20);
         newTimer3.draw();
         console.log(newTimer3.time[0])
     }
@@ -498,12 +466,17 @@ function snowmanPoints() {
 }
 
 function victory() {
-    if (player1.score[0] >= 50 || player2.score[0] >= 50) {
+    if (player1.score[0] >= 60 || player2.score[0] >= 60) {
         gameIsWon = true;
         snowBall1.speedX = 0;
         snowBall2.speedX = 0;
-        if (victorySound.isPlaying() === false) {
+        newTimer4.time.push(3);
+        newTimer4.draw();
+        if (victorySound.isPlaying() === false & newTimer4.time[0] > 0) {
             victorySound.play();
+            if (newTimer4.time[0] === 0) {
+                victorySound.stop();
+            }
         }
         fill(0, 0, 255, 50);
         rect(width/2, height/2, width, height);
@@ -514,17 +487,18 @@ function victory() {
             text("Player 1 Wins!", width/2, height/2-50);
         } else if (player2.score[0] > player1.score[0]) {
             text("Player 2 Wins!", width/2, height/2-50);
+        } else if (player1.score[0] === player2.score[0]) {
+            text("It's a Draw!", width/2, height/2-50);
         }
         restart();
     }
 }
 
 function restart() {
-    rect(width/2, height/2+100, 150, 80);
-    console.log(mouseX);
+    image(restartButton, width/2, height/2+100);
     if (mouseX >= width/2-75 & mouseX <= width/2+75
         & mouseY >= height/2+60 & mouseY <= height/2+140) {
-            fill(0, 255, 0);
+            fill(0, 255, 0, 150);
             rect(width/2, height/2+100, 150, 80);
     }
     if (gameRestarted === true) {
@@ -542,4 +516,18 @@ function restart() {
         snowmanIsBuilt2 = false;
         pointsAwarded1 = false, pointsAwarded2 = false;
     }
+}
+
+function gameRules() {
+    fill(255);
+    strokeWeight(10);
+    strokeJoin(ROUND);
+    stroke(0, 100, 150);
+    rect(width/2+10, height-175, 910, 200);
+    noStroke();
+    fill(0);
+    textAlign(CENTER);
+    textSize(20)
+    text("Player 1: WASD keys to move and Space Bar to throw Snow Balls\n Player 2: Arrow keys to move and Enter to throw Snow Balls. \n One point is scored for each snow ball that hits, and 20 for each snowman built.\n To build a snowman, stand in the circle that will appear 20 seconds after the game begins.\n The first player to reach 60 points will win the game.\n Good luck, and happy holidays!", width/2, height-230);
+    text("Made by Bennie Watson", width/2, 200);
 }
