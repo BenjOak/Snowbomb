@@ -7,18 +7,17 @@ let timeUp = true;
 let snowmanIsBuilt1 = false, snowmanIsBuilt2 = false;
 let pointsAwarded1 = false, pointsAwarded2 = false;
 let gameRestarted = false;
-
-
+let stopVictorySound = [0];
 
 function preload() {
     //swapped the image numbers around for the actual gameplay
     sprite1Still = loadImage("assets/Sprite_2_stoodstill.png");
     sprite2Still = loadImage("assets/Sprite_1.png");
-    song = loadSound("assets/Snowbomber Theme_01.mp3");
+    song = loadSound("assets/SnowbomberTheme_01.mp3");
     victorySound = loadSound("assets/Victory.wav");
     snowBallHit = loadSound("assets/snowBallHit_01.mp3");
     pixelFont = loadFont("assets/PixelifySans-VariableFont_wght.ttf");
-    title = loadImage("assets/Snowbomber Title.png");
+    title = loadImage("assets/SnowbomberTitle.png");
     snowman = loadImage("assets/Snowman.png");
     stage = loadImage("assets/Stage.png");
     startButton = loadImage("assets/StartGameButton2.png");
@@ -186,7 +185,6 @@ let snowBall2 = [new SnowBall()];
 let newTimer1 = new Timer();
 let newTimer2 = new Timer();
 let newTimer3 = new Timer();
-let newTimer4 = new Timer();
 let snowman1, snowman2;
 
 function setup() {
@@ -211,6 +209,8 @@ function draw() {
     music();
     victory();
     snowmanPoints();
+    restartGame();
+    //console.log(victorySound.isPlaying());
 }
 
 /**sprite stops if player releases movement key
@@ -258,10 +258,14 @@ function keyReleased() {
                 }
             }
             if (keyCode === UP_ARROW) {
-                player2.yDir = 0;
+                if (!keyIsDown(LEFT_ARROW) || !keyIsDown(RIGHT_ARROW)) {
+                    player2.yDir = 0;
+                }
             }
             if (keyCode === DOWN_ARROW) {
-                player2.yDir = 0;
+                if (!keyIsDown(LEFT_ARROW) || !keyIsDown(RIGHT_ARROW)) {
+                    player2.yDir = 0;
+                }
             }
             if (keyCode === ENTER) {
                 if (!keyIsDown(RIGHT_ARROW) || !keyIsDown(LEFT_ARROW)) {
@@ -473,16 +477,14 @@ function victory() {
         player1.xDir = 0;
         snowBall1.speedX = 0;
         snowBall2.speedX = 0;
-        newTimer4.time.push(3);
-        newTimer4.draw();
-        if (victorySound.isPlaying() === false & newTimer4.time[0] > 0) {
+        if (stopVictorySound[0] === 0) {
             victorySound.play();
-            if (newTimer4.time[0] === 0) {
-                victorySound.stop();
-            }
+        }
+        if (victorySound.isPlaying() === true) {
+            victorySound.stop(3);
+            stopVictorySound.unshift(1)
         }
         victoryScreenText();
-        restart();
     }
 }
 
@@ -500,13 +502,17 @@ function restart() {
         player2.y = 500;
         player1.score.unshift(0);
         player2.score.unshift(0);
-        newTimer3.time.unshift(30);
+        newTimer3.time.unshift(20);
+        newTimer1.time.unshift(5);
+        newTimer2.time.unshift(5);
+        stopVictorySound.unshift(0);
         isGameStarted = false;
         gameIsWon = false;
         timeUp = false;
         snowmanIsBuilt1 = false;
         snowmanIsBuilt2 = false;
         pointsAwarded1 = false, pointsAwarded2 = false;
+        gameRestarted = false;
     }
 }
 
@@ -542,4 +548,10 @@ function gameRules() {
     textSize(20)
     text("Player 1: WASD keys to move and Space Bar to throw Snow Balls\n Player 2: Arrow keys to move and Enter to throw Snow Balls. \n One point is scored for each snow ball that hits, and 20 for each snowman built.\n To build a snowman, stand in the circle that will appear 20 seconds after the game begins.\n The first player to reach 60 points will win the game.\n Good luck, and happy holidays!", width/2, height-230);
     text("Made by Bennie Watson", width/2, 200);
+}
+
+function restartGame() {
+    if (gameIsWon === true) {
+        restart();
+    }
 }
