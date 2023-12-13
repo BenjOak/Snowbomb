@@ -414,7 +414,6 @@ function buildSnowman() {
     if (isGameStarted === true) {
         newTimer3.time.push(20);
         newTimer3.draw();
-        console.log(newTimer3.time[0])
     }
     ellipseMode(CENTER);
     if (newTimer3.time[0] === 0) {
@@ -468,6 +467,10 @@ function snowmanPoints() {
 function victory() {
     if (player1.score[0] >= 60 || player2.score[0] >= 60) {
         gameIsWon = true;
+        player1.xDir = 0;
+        player1.yDir = 0;
+        player2.xDir = 0;
+        player1.xDir = 0;
         snowBall1.speedX = 0;
         snowBall2.speedX = 0;
         newTimer4.time.push(3);
@@ -478,18 +481,7 @@ function victory() {
                 victorySound.stop();
             }
         }
-        fill(0, 0, 255, 50);
-        rect(width/2, height/2, width, height);
-        fill(255);
-        textAlign(CENTER);
-        textSize(100);
-        if (player1.score[0] > player2.score[0]) {
-            text("Player 1 Wins!", width/2, height/2-50);
-        } else if (player2.score[0] > player1.score[0]) {
-            text("Player 2 Wins!", width/2, height/2-50);
-        } else if (player1.score[0] === player2.score[0]) {
-            text("It's a Draw!", width/2, height/2-50);
-        }
+        victoryScreenText();
         restart();
     }
 }
@@ -516,6 +508,26 @@ function restart() {
         snowmanIsBuilt2 = false;
         pointsAwarded1 = false, pointsAwarded2 = false;
     }
+}
+
+function victoryScreenText() {
+    fill(0, 0, 255, 50);
+    rect(width/2, height/2, width, height);
+    fill(255);
+    textAlign(CENTER);
+    textSize(100);
+    if (player1.score[0] > player2.score[0]) {
+        text("Player 1 Wins!", width/2, height/2-50);
+    } else if (player2.score[0] > player1.score[0]) {
+        text("Player 2 Wins!", width/2, height/2-50);
+    } else if (player1.score[0] === player2.score[0]) {
+        text("It's a Draw!", width/2, height/2-50);
+    }
+    noStroke();
+    fill(0);
+    textSize(20)
+    text("Made by Bennie Watson", width/2, 200);
+    text("Music composed by Bennie on BeepBox", width/2, 230);
 }
 
 function gameRules() {
