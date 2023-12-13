@@ -3,9 +3,11 @@ let snowTile, sprite1Still, sprite2Still, song, pixelFont, title, snowman,
 let moveSpeed = 2;
 let isGameStarted = false;
 let gameIsWon = false;
-let timeUp = false;
-let snowmanIsBuilt1 = false;
-let snowmanIsBuilt2 = false;
+let timeUp = true;
+let snowmanIsBuilt1 = false, snowmanIsBuilt2 = false;
+let pointsAwarded1 = false, pointsAwarded2 = false;
+let gameRestarted = false;
+
 
 
 function preload() {
@@ -184,17 +186,6 @@ class SnowBall {
         fill(255);
         circle(this.x += this.speedX, this.y, 20);
     }
-
-    // move() {
-    //     if (this.x >= player1.x || this.x <= width) {
-    //         this.x += 10;
-    //         this.y;    
-    // }
-    //     if (this.x <= player2.x || this.x >= 0) {
-    //         this.x -= 10;
-    //         this.y;
-    //     }
-    // }
 }
 
 class Snowman {
@@ -212,8 +203,8 @@ let snowBall1 = [new SnowBall()];
 let snowBall2 = [new SnowBall()];
 let newTimer1 = new Timer();
 let newTimer2 = new Timer();
-let snowman1;
-let snowman2;
+let newTimer3 = new Timer();
+let snowman1, snowman2;
 
 function setup() {
     createCanvas(1000, 1000);
@@ -221,7 +212,6 @@ function setup() {
     rectMode(CENTER);
     snowman1 = new Snowman(random(70, width/2-70), random(70, height-70));
     snowman2 = new Snowman(random(width/2+70, width-70), random(70, height-70));
-    snowmanPoints();
 }
 
 function draw() {
@@ -237,6 +227,7 @@ function draw() {
     startGame();
     music();
     victory();
+    snowmanPoints();
 
     //console.log("p1.x, p1.y, p2.x, p2.y:", player1.x+20, player1.y, player2.x-20, player2.y)
     // console.log(player1.score[0]);
@@ -261,28 +252,36 @@ function keyReleased() {
                 }
             }
             if (key === "d") {
-                if (!keyIsPressed) {
+                if (!keyIsDown("a")) {
                     player1.xDir = 0;
                 }
             }
             if (key === "w") {
-                player1.yDir = 0;
+                if (!keyIsDown("a") || !keyIsDown("d")) {
+                    player1.yDir = 0;
+                }
             }
             if (key === "s") {
-                player1.yDir = 0;
+                if (!keyIsDown("a") || !keyIsDown("d")) {
+                    player1.yDir = 0;
+                }
             }
             if (key === " ") {
-                player1.snowPosX = player1.x;
-                player1.snowPosY = player1.y;
-                snowBall1.push(new SnowBall(player1.snowPosX, player1.snowPosY, 10));
-                //console.log(player1.snowPosX[0], player1.snowPosY[0]);
-        
+                if (!keyIsDown("a") || !keyIsDown("d") || !keyIsDown("w")|| (!keyIsDown("s"))); {
+                    player1.snowPosX = player1.x;
+                    player1.snowPosY = player1.y;
+                    snowBall1.push(new SnowBall(player1.snowPosX, player1.snowPosY, 10));
+                }
             }
             if (keyCode === LEFT_ARROW) {
-                player2.xDir = 0;
+                if (!keyIsDown(RIGHT_ARROW)) {
+                    player2.xDir = 0;
+                }
             }
             if (keyCode === RIGHT_ARROW) {
-                player2.xDir = 0;
+                if (!keyIsDown(LEFT_ARROW)) {
+                    player2.xDir = 0;
+                }
             }
             if (keyCode === UP_ARROW) {
                 player2.yDir = 0;
@@ -291,10 +290,11 @@ function keyReleased() {
                 player2.yDir = 0;
             }
             if (keyCode === ENTER) {
-                player2.snowPosX = player2.x;
-                player2.snowPosY = player2.y;
-                snowBall2.push(new SnowBall(player2.snowPosX, player2.snowPosY, -10));
-                //console.log(player2.snowPosX[0], player2.snowPosY[0]);
+                if (!keyIsDown(RIGHT_ARROW) || !keyIsDown(LEFT_ARROW)) {
+                    player2.snowPosX = player2.x;
+                    player2.snowPosY = player2.y;
+                    snowBall2.push(new SnowBall(player2.snowPosX, player2.snowPosY, -10));
+                } 
             }
         }
     }
@@ -368,7 +368,8 @@ function snowBalls() {
         ball.draw();
         if (ball.x >= player2.x-20 & ball.x <= player2.x+20 & ball.y <= player2.y+47
                 & ball.y >= player2.y-47) {
-            ball.x=-100000
+            ball.x=-100000;
+            ball.speedX=0;
             //snowBall1.pop();
             player1.score.unshift(player1.score[0]+1);
             snowBallHit.play();
@@ -379,7 +380,8 @@ function snowBalls() {
         ball.draw();
         if (ball.x <= player1.x+20 & ball.x >= player1.x-20 & ball.y <= player1.y+49
                 & ball.y >= player1.y-41) {
-            ball.x=100000
+            ball.x=100000;
+            ball.speedX=0;
             //snowBall2.shift();
             player2.score.unshift(player2.score[0]+1);
             snowBallHit.play();
@@ -418,6 +420,12 @@ function mouseClicked() {
         & mouseY >= height/2-50 & mouseY <= height/2+50) {
             isGameStarted = true;
     }
+    if (gameIsWon === true) {
+        if (mouseX >= width/2-75 & mouseX <= width/2+75
+        & mouseY >= height/2+60 & mouseY <= height/2+140) {
+            gameRestarted = true;
+        }
+    }
 }
 
 function music() {
@@ -435,62 +443,65 @@ function middleLine() {
 }
 
 function buildSnowman() {
+    if (isGameStarted === true) {
+        newTimer3.time.push(30);
+        newTimer3.draw();
+        console.log(newTimer3.time[0])
+    }
     ellipseMode(CENTER);
-    //console.log(newTimer.time[0])
-    if (player1.x >= snowman1.x-40 & player1.x <= snowman1.x+40 
-        & player1.y >= snowman1.y-40 & player1.y <= snowman1.y+40) {
-            fill(0, 0, 255);
-            newTimer1.time.push(5);
-            newTimer1.draw();
-        } else fill(255);
-        if (!snowmanIsBuilt1) {
-            circle(snowman1.x, snowman1.y, 80);
+    if (newTimer3.time[0] === 0) {
+        if (player1.x >= snowman1.x-40 & player1.x <= snowman1.x+40 
+            & player1.y >= snowman1.y-40 & player1.y <= snowman1.y+40) {
+                fill(0, 0, 255);
+                newTimer1.time.push(5);
+                newTimer1.draw();
+            } else fill(255);
+            if (!snowmanIsBuilt1) {
+                circle(snowman1.x, snowman1.y, 80);
+            }
+            if (snowmanIsBuilt1 === true) {
+                image(snowman, snowman1.x, snowman1.y);
+            }
+        if (player1.x >= snowman1.x-40 & player1.x <= snowman1.x+40 
+            & player1.y >= snowman1.y-40 & player1.y <= snowman1.y+40 & newTimer1.time[0] === 0) {
+                snowmanIsBuilt1 = true;
+            }
+    
+        if (player2.x >= snowman2.x-40 & player2.x <= snowman2.x+40 
+            & player2.y >= snowman2.y-40 & player2.y <= snowman2.y+40) {
+                fill(0, 0, 255);
+                newTimer2.time.push(5);
+                newTimer2.draw();
+            } else fill(255);
+        if (!snowmanIsBuilt2) {
+            circle(snowman2.x, snowman2.y, 80);
         }
-        if (snowmanIsBuilt1 === true) {
-            image(snowman, snowman1.x, snowman1.y);
+        if (snowmanIsBuilt2 === true) {
+            image(snowman, snowman2.x, snowman2.y);
         }
-    if (player1.x >= snowman1.x-40 & player1.x <= snowman1.x+40 
-        & player1.y >= snowman1.y-40 & player1.y <= snowman1.y+40 & newTimer1.time[0] === 0) {
-            snowmanIsBuilt1 = true;
+        if (player2.x >= snowman2.x-40 & player2.x <= snowman2.x+40 
+            & player2.y >= snowman2.y-40 & player2.y <= snowman2.y+40 & newTimer2.time[0] === 0) {
+                snowmanIsBuilt2 = true;
         }
-
-    if (player2.x >= 260 & player2.x <= 340 
-        & player2.y >= 160 & player2.y <= 240) {
-            fill(0, 0, 255);
-            newTimer2.time.push(5);
-            newTimer2.draw();
-        } else fill(255);
-    if (!snowmanIsBuilt2) {
-        circle(snowman2.x, snowman2.y, 80);
     }
-    if (snowmanIsBuilt2 === true) {
-        image(snowman, snowman2.x, snowman2.y);
-    }
-    if (player2.x >= 260 &  player2.x <= 340
-        & player2.y >= 160 & player2.y <= 240 & newTimer2.time[0] === 0) {
-            snowmanIsBuilt2 = true;
-    }
-    console.log(snowman1.x, snowman1.y)
-    // if (!snowmanIsBuilt) {
-    //     circle(300, 200, 80);
-    // }
-    // if (snowmanIsBuilt === true) {
-    //     image(snowman, 300, 200);
-    // }
 }
 
 function snowmanPoints() {
-    if (snowmanIsBuilt1) {
+    if (snowmanIsBuilt1 && !pointsAwarded1) {
         player1.score.unshift(player1.score[0]+20);
+        pointsAwarded1 = true;
+    }
+    if (snowmanIsBuilt2 && !pointsAwarded2) {
+        player2.score.unshift(player2.score[0]+20);
+        pointsAwarded2 = true;
     }
 }
 
 function victory() {
-    if (player1.score[0] >= 100 || player2.score[0] >= 10) {
+    if (player1.score[0] >= 50 || player2.score[0] >= 50) {
         gameIsWon = true;
         snowBall1.speedX = 0;
         snowBall2.speedX = 0;
-        //SnowBall.speedX = 0;
         if (victorySound.isPlaying() === false) {
             victorySound.play();
         }
@@ -504,5 +515,31 @@ function victory() {
         } else if (player2.score[0] > player1.score[0]) {
             text("Player 2 Wins!", width/2, height/2-50);
         }
+        restart();
+    }
+}
+
+function restart() {
+    rect(width/2, height/2+100, 150, 80);
+    console.log(mouseX);
+    if (mouseX >= width/2-75 & mouseX <= width/2+75
+        & mouseY >= height/2+60 & mouseY <= height/2+140) {
+            fill(0, 255, 0);
+            rect(width/2, height/2+100, 150, 80);
+    }
+    if (gameRestarted === true) {
+        player1.x = 100;
+        player1.y = 500;
+        player2.x = 900;
+        player2.y = 500;
+        player1.score.unshift(0);
+        player2.score.unshift(0);
+        newTimer3.time.unshift(30);
+        isGameStarted = false;
+        gameIsWon = false;
+        timeUp = false;
+        snowmanIsBuilt1 = false;
+        snowmanIsBuilt2 = false;
+        pointsAwarded1 = false, pointsAwarded2 = false;
     }
 }
