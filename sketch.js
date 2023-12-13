@@ -18,7 +18,7 @@ function preload() {
     victorySound = loadSound("assets/Victory.wav");
     snowBallHit = loadSound("assets/snowBallHit_01.mp3");
     pixelFont = loadFont("assets/PixelifySans-VariableFont_wght.ttf");
-    title = loadImage("assets/Snowbomber title.png");
+    title = loadImage("assets/Snowbomber Title.png");
     snowman = loadImage("assets/Snowman.png");
     stage = loadImage("assets/Stage.png");
     startButton = loadImage("assets/StartGameButton2.png");
